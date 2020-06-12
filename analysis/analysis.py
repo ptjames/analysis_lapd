@@ -33,19 +33,20 @@ from data import db_utils
 # Function comments in MAIN section
 
 def parse_input_arguments(args):
-	error_message = 'script requires one argument {race|sex}'
-	if len(args) != 2: 
+	error_message = 'script requires two arguments {race|sex} {alone|all}'
+	if len(args) != 3: 
 		print(error_message); sys.exit()
-	if args[1] not in ['race', 'sex']: 
+	if (args[1] not in ['race', 'sex']) or (args[2] not in ['alone', 'all']): 
 		print(error_message); sys.exit()	
 	demographic_mode = args[1]
 	if demographic_mode == 'race':
 		demographic_field_name = 'descent_code'
-		demographics_considered = ['B', 'A', 'H', 'W', 'O']
+		demographics_considered = ['H', 'B', 'W', 'O', 'A'] # descent with stops > 10,000 (ordered desc)
 	if demographic_mode == 'sex':
 		demographic_field_name = 'sex_code'
 		demographics_considered = ['F', 'M']
-	return demographic_mode, demographic_field_name, demographics_considered
+	officer_alone_bool = True if args[2] == 'alone' else False
+	return demographic_mode, demographic_field_name, demographics_considered, officer_alone_bool
 	
 
 def query_stops_data(demographic_field_name):
@@ -106,10 +107,14 @@ def gather_officers_in_distribution_period(officer_stop_distributions, officer_s
 	return officer_stop_distributions
 
 
-def ensure_min_sample_size_for_distributions(officer_stop_distributions, date_data):
+def ensure_min_sample_size_for_distributions(officer_stop_distributions, date_data, officer_alone_bool):
 	officer_keys = list(officer_stop_distributions[date_data].keys())
 	for officer in officer_keys:
-		if len(officer_stop_distributions[date_data][officer]) < 20:
+		if officer_alone_bool == True:
+			sample_size = len([ 1 for x in officer_stop_distributions[date_data][officer] if x['officer_alone'] == 1 ])
+		else:
+			sample_size = len(officer_stop_distributions[date_data][officer])
+		if sample_size < 20:
 			del officer_stop_distributions[date_data][officer]
 	return officer_stop_distributions
 
@@ -122,6 +127,10 @@ def calculate_officer_stop_details_distributions(officer_stop_distributions, dat
 		for stop_datum in officer_stop_distributions[date_data][officer]:
 			demographic = stop_datum[demographic_field_name]
 			district = stop_datum['reporting_district']
+			officer_alone = stop_datum['officer_alone']
+			if officer_alone_bool == True:
+				if officer_alone == 0:
+					continue
 			if demographic in stops_by_demographic:
 				stops_by_demographic[demographic] += 1.0
 			if district not in stops_by_district:
@@ -137,6 +146,7 @@ def calculate_officer_stop_details_distributions(officer_stop_distributions, dat
 def store_data_in_officer_dictionaries(officer_stops, officer_pairs, stop_date, row, demographic_field_name):
 	officer_1 = row['officer_1_serial_number']
 	officer_2 = row['officer_2_serial_number']
+	row['officer_alone'] = 1 if officer_2 in ['nan', ''] else 0
 	if stop_date not in officer_stops:
 		officer_stops[stop_date] = {}
 		officer_pairs[stop_date] = {}
@@ -146,8 +156,8 @@ def store_data_in_officer_dictionaries(officer_stops, officer_pairs, stop_date, 
 	if officer_2 not in officer_stops[stop_date]:
 		officer_stops[stop_date][officer_2] = []
 		officer_pairs[stop_date][officer_2] = {}
-	officer_stops[stop_date][officer_1].append({ field: row[field] for field in [demographic_field_name, 'reporting_district'] })
-	officer_stops[stop_date][officer_2].append({ field: row[field] for field in [demographic_field_name, 'reporting_district'] })
+	officer_stops[stop_date][officer_1].append({ field: row[field] for field in [demographic_field_name, 'reporting_district', 'officer_alone'] })
+	officer_stops[stop_date][officer_2].append({ field: row[field] for field in [demographic_field_name, 'reporting_district', 'officer_alone'] })
 	officer_pairs[stop_date][officer_1][officer_2] = 1
 	officer_pairs[stop_date][officer_2][officer_1] = 1
 	return officer_stops, officer_pairs
@@ -233,7 +243,6 @@ def split_data_into_x_and_y(data, demographics_considered):
 			field_order.append('influencing_n_interactions')
 			c += 1
 		data_x.append(np.asarray(datum_x))
-		#data_y.append(datum['officer_distribution_differences'][y_target])
 		data_y.append(1 if datum['officer_distribution_differences'][demographic] > 0.0 else 0)
 		data_c.append(str(datum['officer']))
 	return data_x, data_y, data_c, field_order
@@ -290,18 +299,19 @@ def evaluate_model(model, data_x_eval, data_y_eval, field_order):
 	pprint(importances)
 
 
-def create_model_shap_plots(model, data_x_train, field_order, demographic):
+def create_model_shap_plots(model, data_x_train, field_order, demographic, officer_alone_bool):
 	explainer = shap.TreeExplainer(model)
 	shap_values = explainer.shap_values(data_x_train)
+	alone_str = 'alone' if officer_alone_bool == True else 'all'
 
 	fig = shap.summary_plot(shap_values, data_x_train, feature_names=field_order)
 	plt.tight_layout()
-	plt.savefig(os.path.join('plots', demographic + '_shap_summary.png'))
+	plt.savefig(os.path.join('plots', demographic + '_' + alone_str + '_shap_summary.png'))
 	plt.clf()
 
 	shap.dependence_plot(demographic + '_influencing', shap_values, data_x_train, feature_names=field_order, interaction_index=demographic + '_officer_past')
 	plt.tight_layout()
-	plt.savefig(os.path.join('plots', demographic + '_shap_dependence.png'))
+	plt.savefig(os.path.join('plots', demographic + '_' + alone_str + '_shap_dependence.png'))
 	plt.clf()
 
 
@@ -311,7 +321,7 @@ def create_model_shap_plots(model, data_x_train, field_order, demographic):
 ############
 
 # parsing input arguments
-demographic_mode, demographic_field_name, demographics_considered = parse_input_arguments(sys.argv)
+demographic_mode, demographic_field_name, demographics_considered, officer_alone_bool = parse_input_arguments(sys.argv)
 
 # querying pedestrian stops by LAPD
 con, cur = query_stops_data(demographic_field_name)
@@ -347,7 +357,7 @@ while True:
 		# checking if all data gathered for previous date (since query ordered by date asc)
 		if prev_row_stop_date != stop_date:
 
-			# updating data tracking variables
+			# updating date tracking variables
 			prev_row_stop_date_idx = dates_data_all.index(prev_row_stop_date)
 			prev_row_stop_date = stop_date
 
@@ -370,7 +380,7 @@ while True:
 					officer_stop_distributions = gather_officers_in_distribution_period(officer_stop_distributions, officer_stops, date_data)
 					
 					# ensuring minimum sample size for calculating distributions
-					officer_stop_distributions = ensure_min_sample_size_for_distributions(officer_stop_distributions, date_data)
+					officer_stop_distributions = ensure_min_sample_size_for_distributions(officer_stop_distributions, date_data, officer_alone_bool)
 
 					# calculating officer stop details distributions
 					officer_stop_distributions = calculate_officer_stop_details_distributions(officer_stop_distributions, date_data, demographics_considered, demographic_field_name)		
@@ -465,7 +475,7 @@ for demographic in demographics_considered:
 	evaluate_model(model, data_x_eval, data_y_eval, field_order)
 
 	# create model shap plots
-	create_model_shap_plots(model, data_x_train, field_order, demographic)
+	create_model_shap_plots(model, data_x_train, field_order, demographic, officer_alone_bool)
 
 
 
