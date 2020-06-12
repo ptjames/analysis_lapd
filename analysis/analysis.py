@@ -64,12 +64,13 @@ def query_stops_data(demographic_field_name):
 			""" + demographic_field_name + """,
 			stop_type
 		FROM policing.vehical_pedestrian_stops
-		WHERE stop_type = 'PED'
+		WHERE stop_type = 'VEH'
 		AND stop_date NOT IN ('', 'nan')
 		AND stop_date > '2010/01/01'
+		AND stop_date < '2020/05/01'
 		ORDER BY stop_date ASC
 
-		LIMIT 3000000
+		LIMIT 8000000
 	"""
 	cur.execute(sql)
 	return con, cur
@@ -270,22 +271,31 @@ def split_data_into_train_and_eval(data_x, data_y, data_c):
 	return data_x_train, data_y_train, data_x_eval, data_y_eval, officers_train, officers_eval
 
 
-def fit_model(data_x_train, data_y_train, data_y_eval, officers_train, officers_eval):
+def describe_train_eval_split(data_y_train, data_y_eval, officers_train, officers_eval):
+	train_class_0_pct = len([ 1 for y in data_y_train if y == 0 ]) / float(len(data_y_train))
+	train_class_1_pct = len([ 1 for y in data_y_train if y == 1 ]) / float(len(data_y_train))
+	eval_class_0_pct = len([ 1 for y in data_y_eval if y == 0 ]) / float(len(data_y_eval))
+	eval_class_1_pct = len([ 1 for y in data_y_eval if y == 1 ]) / float(len(data_y_eval))	
+
 	print('\ndataset train details:')
 	print('\tsize: ' + str(len(data_y_train)))
 	print('\tnumber of officers: ' + str(len(officers_train)))
-	print('\tclass 0: ' + str(len([ 1 for y in data_y_train if y == 0 ]) / float(len(data_y_train))))
-	print('\tclass 1: ' + str(len([ 1 for y in data_y_train if y == 1 ]) / float(len(data_y_train))))
+	print('\tclass 0: ' + str(train_class_0_pct))
+	print('\tclass 1: ' + str(train_class_1_pct))
 
 	print('\ndataset eval details:') 
 	print('\tsize: ' + str(len(data_y_eval))) 
 	print('\tnumber of officers: ' + str(len(officers_eval)))
-	print('\tclass 0: ' + str(len([ 1 for y in data_y_eval if y == 0 ]) / float(len(data_y_eval))))
-	print('\tclass 1: ' + str(len([ 1 for y in data_y_eval if y == 1 ]) / float(len(data_y_eval))))
+	print('\tclass 0: ' + str(eval_class_0_pct))
+	print('\tclass 1: ' + str(eval_class_1_pct))
 
+	return eval_class_0_pct, eval_class_1_pct
+
+
+def fit_model(data_x_train, data_y_train):
 	model = GradientBoostingClassifier(n_estimators=100)
-	#model = GradientBoostingRegressor(n_estimators=100)
 	model.fit(data_x_train, data_y_train)
+	print(model)
 	return model
 
 
@@ -294,22 +304,23 @@ def evaluate_model(model, data_x_eval, data_y_eval, field_order):
 	importances = { field_order[i]: importances[i] for i in range(0,len(field_order)) }
 	importances = sorted(importances.items(), key=lambda x: x[1], reverse=True)
 	score = model.score(data_x_eval, data_y_eval)
-	print(model)
 	print(score)
-	pprint(importances)
+	return score
 
 
-def create_model_shap_plots(model, data_x_train, field_order, demographic, officer_alone_bool):
+def create_model_shap_plots(model, data_x_train, score, eval_class_0_pct, eval_class_1_pct, field_order, demographic, officer_alone_bool):
 	explainer = shap.TreeExplainer(model)
 	shap_values = explainer.shap_values(data_x_train)
 	alone_str = 'alone' if officer_alone_bool == True else 'all'
 
 	fig = shap.summary_plot(shap_values, data_x_train, feature_names=field_order)
+	plt.title(demographic + ' ' + alone_str + ': (model score: ' + str(round(score,3)) + ', class 0 pct: ' + str(round(eval_class_0_pct,3)) + ')') 
 	plt.tight_layout()
 	plt.savefig(os.path.join('plots', demographic + '_' + alone_str + '_shap_summary.png'))
 	plt.clf()
 
 	shap.dependence_plot(demographic + '_influencing', shap_values, data_x_train, feature_names=field_order, interaction_index=demographic + '_officer_past')
+	plt.title(demographic + ' ' + alone_str + ': (model score: ' + str(round(score,3)) + ', class 0 pct: ' + str(round(eval_class_0_pct,3)) + ')')
 	plt.tight_layout()
 	plt.savefig(os.path.join('plots', demographic + '_' + alone_str + '_shap_dependence.png'))
 	plt.clf()
@@ -323,7 +334,7 @@ def create_model_shap_plots(model, data_x_train, field_order, demographic, offic
 # parsing input arguments
 demographic_mode, demographic_field_name, demographics_considered, officer_alone_bool = parse_input_arguments(sys.argv)
 
-# querying pedestrian stops by LAPD
+# querying stops by LAPD
 con, cur = query_stops_data(demographic_field_name)
 
 # initializing data structures
@@ -468,14 +479,17 @@ for demographic in demographics_considered:
 	data_x_train, data_y_train, data_x_eval, data_y_eval, officers_train, officers_eval = split_data_into_train_and_eval(data_x, data_y, data_c)
 	data_x = []; data_y = []; data_c = []
 
+	# describing details of train and evaluation sets
+	eval_class_0_pct, eval_class_1_pct = describe_train_eval_split(data_y_train, data_y_eval, officers_train, officers_eval)
+
 	# fitting model
-	model = fit_model(data_x_train, data_y_train, data_y_eval, officers_train, officers_eval)
+	model = fit_model(data_x_train, data_y_train)
 
-	# evaluate model
-	evaluate_model(model, data_x_eval, data_y_eval, field_order)
+	# evaluating model
+	score = evaluate_model(model, data_x_eval, data_y_eval, field_order)
 
-	# create model shap plots
-	create_model_shap_plots(model, data_x_train, field_order, demographic, officer_alone_bool)
+	# creating model shap plots
+	create_model_shap_plots(model, data_x_train, score, eval_class_0_pct, eval_class_1_pct, field_order, demographic, officer_alone_bool)
 
 
 
