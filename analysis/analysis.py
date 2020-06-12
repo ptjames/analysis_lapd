@@ -32,7 +32,23 @@ from data import db_utils
 
 # Function comments in MAIN section
 
-def query_stops_data():
+def parse_input_arguments(args):
+	error_message = 'script requires one argument {race|sex}'
+	if len(args) != 2: 
+		print(error_message); sys.exit()
+	if args[1] not in ['race', 'sex']: 
+		print(error_message); sys.exit()	
+	demographic_mode = args[1]
+	if demographic_mode == 'race':
+		demographic_field_name = 'descent_code'
+		demographics_considered = ['B', 'A', 'H', 'W', 'O']
+	if demographic_mode == 'sex':
+		demographic_field_name = 'sex_code'
+		demographics_considered = ['F', 'M']
+	return demographic_mode, demographic_field_name, demographics_considered
+	
+
+def query_stops_data(demographic_field_name):
 	print('querying data...')
 	con, cur = db_utils.connect_to_db()
 	cur.close()
@@ -44,7 +60,7 @@ def query_stops_data():
 			officer_1_serial_number,
 			officer_2_serial_number,
 			reporting_district,
-			descent_code,
+			""" + demographic_field_name + """,
 			stop_type
 		FROM policing.vehical_pedestrian_stops
 		WHERE stop_type = 'PED'
@@ -98,27 +114,27 @@ def ensure_min_sample_size_for_distributions(officer_stop_distributions, date_da
 	return officer_stop_distributions
 
 
-def calculate_officer_stop_details_distributions(officer_stop_distributions, date_data, ethnicities_considered):
+def calculate_officer_stop_details_distributions(officer_stop_distributions, date_data, demographics_considered, demographic_field_name):
 	for officer in officer_stop_distributions[date_data]:
-		stops_by_ethnicity = { x: 0.0 for x in ethnicities_considered }
+		stops_by_demographic = { x: 0.0 for x in demographics_considered }
 		stops_by_district = {}
 		n_stops = float(len(officer_stop_distributions[date_data][officer]))
 		for stop_datum in officer_stop_distributions[date_data][officer]:
-			ethnicity = stop_datum['descent_code']
+			demographic = stop_datum[demographic_field_name]
 			district = stop_datum['reporting_district']
-			if ethnicity in stops_by_ethnicity:
-				stops_by_ethnicity[ethnicity] += 1.0
+			if demographic in stops_by_demographic:
+				stops_by_demographic[demographic] += 1.0
 			if district not in stops_by_district:
 				stops_by_district[district] = 0.0
 			stops_by_district[district] += 1.0 
 		officer_stop_distributions[date_data][officer] = {
-			'ethnicity': { key: (stops_by_ethnicity[key] / n_stops) for key in stops_by_ethnicity },
+			'demographic': { key: (stops_by_demographic[key] / n_stops) for key in stops_by_demographic },
 			'district': { key: (stops_by_district[key] / n_stops) for key in stops_by_district },
 		}
 	return officer_stop_distributions
 
 
-def store_data_in_officer_dictionaries(officer_stops, officer_pairs, stop_date, row):
+def store_data_in_officer_dictionaries(officer_stops, officer_pairs, stop_date, row, demographic_field_name):
 	officer_1 = row['officer_1_serial_number']
 	officer_2 = row['officer_2_serial_number']
 	if stop_date not in officer_stops:
@@ -130,8 +146,8 @@ def store_data_in_officer_dictionaries(officer_stops, officer_pairs, stop_date, 
 	if officer_2 not in officer_stops[stop_date]:
 		officer_stops[stop_date][officer_2] = []
 		officer_pairs[stop_date][officer_2] = {}
-	officer_stops[stop_date][officer_1].append({ field: row[field] for field in ['descent_code', 'reporting_district'] })
-	officer_stops[stop_date][officer_2].append({ field: row[field] for field in ['descent_code', 'reporting_district'] })
+	officer_stops[stop_date][officer_1].append({ field: row[field] for field in [demographic_field_name, 'reporting_district'] })
+	officer_stops[stop_date][officer_2].append({ field: row[field] for field in [demographic_field_name, 'reporting_district'] })
 	officer_pairs[stop_date][officer_1][officer_2] = 1
 	officer_pairs[stop_date][officer_2][officer_1] = 1
 	return officer_stops, officer_pairs
@@ -175,21 +191,21 @@ def gather_influencing_officers(officer, influencing_dates, officer_pairs):
 	return influencing_officers
 
 
-def calculate_influencing_officers_weighted_distributions(officer_stop_distributions, influencing_officers, date, ethnicities_considered, n_pair_events):
+def calculate_influencing_officers_weighted_distributions(officer_stop_distributions, influencing_officers, date, demographics_considered, n_pair_events):
 	influencing_officer_distributions = {
-		o: officer_stop_distributions[date][o]['ethnicity'] 
+		o: officer_stop_distributions[date][o]['demographic'] 
 			for o in influencing_officers
 				if o in officer_stop_distributions[date]
 	}				
 	influencing_officer_weighted_distribution = {
-		ethnicity: 0.0 for ethnicity in ethnicities_considered
+		demographic: 0.0 for demographic in demographics_considered
 	}			
 	for o in influencing_officer_distributions:
-		for ethnicity in influencing_officer_distributions[o]:
-			if ethnicity in ethnicities_considered:
-				influencing_officer_weighted_distribution[ethnicity] += (influencing_officers[o] * influencing_officer_distributions[o][ethnicity])
-	for ethnicity in influencing_officer_weighted_distribution:
-		influencing_officer_weighted_distribution[ethnicity] /= n_pair_events
+		for demographic in influencing_officer_distributions[o]:
+			if demographic in demographics_considered:
+				influencing_officer_weighted_distribution[demographic] += (influencing_officers[o] * influencing_officer_distributions[o][demographic])
+	for demographic in influencing_officer_weighted_distribution:
+		influencing_officer_weighted_distribution[demographic] /= n_pair_events
 	return influencing_officer_weighted_distribution
 
 
@@ -200,25 +216,25 @@ def calculate_influencing_officers_weighted_distributions(officer_stop_distribut
 
 # Function comments in MAIN section
 
-def split_data_into_x_and_y(data, ethnicities_considered):
+def split_data_into_x_and_y(data, demographics_considered):
 	data_x = []; data_y = []; data_c = []
 	field_order = []
 	c = 0
 	for datum in data:
 		datum_x = []
-		for i in range(0,len(ethnicities_considered)):
-			datum_x.append(datum['officer_past_distribution'][ethnicities_considered[i]])
-			datum_x.append(datum['influencing_distribution'][ethnicities_considered[i]])
+		for i in range(0,len(demographics_considered)):
+			datum_x.append(datum['officer_past_distribution'][demographics_considered[i]])
+			datum_x.append(datum['influencing_distribution'][demographics_considered[i]])
 			if c == 0:
-				field_order.append(ethnicities_considered[i] + '_officer_past')
-				field_order.append(ethnicities_considered[i] + '_influencing') 	
+				field_order.append(demographics_considered[i] + '_officer_past')
+				field_order.append(demographics_considered[i] + '_influencing') 	
 		datum_x.append(datum['influencing_n_interactions'])
 		if c == 0:
 			field_order.append('influencing_n_interactions')
 			c += 1
 		data_x.append(np.asarray(datum_x))
 		#data_y.append(datum['officer_distribution_differences'][y_target])
-		data_y.append(1 if datum['officer_distribution_differences'][ethnicity] > 0.0 else 0)
+		data_y.append(1 if datum['officer_distribution_differences'][demographic] > 0.0 else 0)
 		data_c.append(str(datum['officer']))
 	return data_x, data_y, data_c, field_order
 
@@ -274,18 +290,18 @@ def evaluate_model(model, data_x_eval, data_y_eval, field_order):
 	pprint(importances)
 
 
-def create_model_shap_plots(model, data_x_train, field_order, ethnicity):
+def create_model_shap_plots(model, data_x_train, field_order, demographic):
 	explainer = shap.TreeExplainer(model)
 	shap_values = explainer.shap_values(data_x_train)
 
 	fig = shap.summary_plot(shap_values, data_x_train, feature_names=field_order)
 	plt.tight_layout()
-	plt.savefig(os.path.join('plots', ethnicity + '_shap_summary.png'))
+	plt.savefig(os.path.join('plots', demographic + '_shap_summary.png'))
 	plt.clf()
 
-	shap.dependence_plot(ethnicity + '_influencing', shap_values, data_x_train, feature_names=field_order, interaction_index=ethnicity + '_officer_past')
+	shap.dependence_plot(demographic + '_influencing', shap_values, data_x_train, feature_names=field_order, interaction_index=demographic + '_officer_past')
 	plt.tight_layout()
-	plt.savefig(os.path.join('plots', ethnicity + '_shap_dependence.png'))
+	plt.savefig(os.path.join('plots', demographic + '_shap_dependence.png'))
 	plt.clf()
 
 
@@ -294,17 +310,19 @@ def create_model_shap_plots(model, data_x_train, field_order, ethnicity):
 ##  MAIN  ##
 ############
 
+# parsing input arguments
+demographic_mode, demographic_field_name, demographics_considered = parse_input_arguments(sys.argv)
+
 # querying pedestrian stops by LAPD
-con, cur = query_stops_data()
+con, cur = query_stops_data(demographic_field_name)
 
 # initializing data structures
 officer_pairs = {} # stores what officers made stops with other officers by date
 officer_stops = {} # stores officer stop details by date and officer
-officer_stop_distributions = {} # stores distribution of officer stop details (ethnicity, etc) by officer and date period
+officer_stop_distributions = {} # stores distribution of officer stop details (demographic, etc) by officer and date period
 prev_row_stop_date = ''
 
 # contraint parameters
-ethnicities_considered = ['B', 'A', 'H', 'W', 'O']
 n_distribution_days = 180
 fetch_size = 100000
 
@@ -355,10 +373,10 @@ while True:
 					officer_stop_distributions = ensure_min_sample_size_for_distributions(officer_stop_distributions, date_data)
 
 					# calculating officer stop details distributions
-					officer_stop_distributions = calculate_officer_stop_details_distributions(officer_stop_distributions, date_data, ethnicities_considered)		
+					officer_stop_distributions = calculate_officer_stop_details_distributions(officer_stop_distributions, date_data, demographics_considered, demographic_field_name)		
 
 		# storing data in officer_stops and officer_pairs dictionaries
-		officer_stops, officer_pairs = store_data_in_officer_dictionaries(officer_stops, officer_pairs, stop_date, row)
+		officer_stops, officer_pairs = store_data_in_officer_dictionaries(officer_stops, officer_pairs, stop_date, row, demographic_field_name)
 
 # clear out queried data and close cursor + connection 
 rows = []; cur.close(); con.close()
@@ -404,21 +422,21 @@ for date in officer_stop_distributions:
 
 					# calculating weighted distribution of influencing officers stop behaviors
 					influencing_officer_weighted_distribution = calculate_influencing_officers_weighted_distributions(
-						officer_stop_distributions, influencing_officers, date, ethnicities_considered, n_pair_events
+						officer_stop_distributions, influencing_officers, date, demographics_considered, n_pair_events
 					)
 			
 					# calculating future-past distribution differences
 					officer_stop_distributions_differences = {
-						ethnicity: (officer_future_distribution['ethnicity'][ethnicity] - officer_past_distribution['ethnicity'][ethnicity])
-						for ethnicity in ethnicities_considered
+						demographic: (officer_future_distribution['demographic'][demographic] - officer_past_distribution['demographic'][demographic])
+						for demographic in demographics_considered
 					}	
 	
 					# storing data for modeling
 					data.append({
 						'date': date,
 						'officer': officer,
-						'officer_past_distribution': officer_past_distribution['ethnicity'],
-						'officer_future_distribution': officer_future_distribution['ethnicity'],
+						'officer_past_distribution': officer_past_distribution['demographic'],
+						'officer_future_distribution': officer_future_distribution['demographic'],
 						'officer_distribution_differences': officer_stop_distributions_differences,
 						'influencing_distribution': influencing_officer_weighted_distribution,
 						'influencing_n_interactions': n_pair_events
@@ -428,13 +446,13 @@ for date in officer_stop_distributions:
 
 
 
-# modeling for each ethnicity
+# modeling for each demographic
 print('dataset size: ' + str(len(data)))
-for ethnicity in ethnicities_considered:
-	print('\nmodeling demographic: ' + ethnicity)
+for demographic in demographics_considered:
+	print('\nmodeling demographic: ' + demographic)
 
 	# splitting data into inputs and targets 
-	data_x, data_y, data_c, field_order = split_data_into_x_and_y(data, ethnicities_considered)
+	data_x, data_y, data_c, field_order = split_data_into_x_and_y(data, demographics_considered)
 
 	# splitting data into train and evaluation sets
 	data_x_train, data_y_train, data_x_eval, data_y_eval, officers_train, officers_eval = split_data_into_train_and_eval(data_x, data_y, data_c)
@@ -447,7 +465,7 @@ for ethnicity in ethnicities_considered:
 	evaluate_model(model, data_x_eval, data_y_eval, field_order)
 
 	# create model shap plots
-	create_model_shap_plots(model, data_x_train, field_order, ethnicity)
+	create_model_shap_plots(model, data_x_train, field_order, demographic)
 
 
 
