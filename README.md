@@ -36,13 +36,17 @@ Diving a bit deeper, the dependence plot shows a key detail related to our hypot
 ### SHAP Male (M)
 The M model accuracy comes out to 65%, which is reasonably better than the naive guess at 54.5% accuracy. The SHAP summary plot generally shows that our prediction increases as M_influencing increases.
 ![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_summary.png)
-![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_dependence.png)
 
 Additionally, holding M_officer_past relatively constant, M_influencing still has a large effect on the SHAP value.
-From here, we can look at our SHAP plots by race/descent. 
+![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_dependence.png)
 
 ### SHAP Hispanic/Latin/Mexican (H)
+Next we move onto racial demographics. Remember that we have to maintain stronger assumptions with these, since different areas of the city have different racial distributions. I will revisit this point one more time in the Future Work section below. 
+
+Model accuracy for H comes out to 64.7%, which is an improvement over the naive guess at 56.5% accuracy. The SHAP summary plot generally shows that our prediction increases as H_influencing increases.
 ![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/H_alone_shap_summary.png)
+
+For the dependence, holding H_officer_past relatively constant, H_influencing still has a large effect on the SHAP value.
 ![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/H_alone_shap_dependence.png)
 
 ### SHAP Black (B)
