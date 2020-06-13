@@ -20,7 +20,7 @@ One final constraint involves how stop distributions are calculated. Just to ens
 
 ## Process
 First the vehical stop data was loaded into a database. This was done by:
-1) [Define the stops table design](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_tables.py#L39)
+1) [Define the stops table design](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_tables.py#L60-L75)
 2) [Load the stops csv into the database table](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_fill_from_csv.py#L61)
 
 Next comes the analysis section. For anyone looking to dive deep into the code, start at the MAIN section [here](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L330) and scroll down from there. I have commented each step in the MAIN section to others can follow along. For those looking for a higher level overview, I have written out the following steps:
