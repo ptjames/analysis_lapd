@@ -22,7 +22,7 @@ One final constraint involves how stop distributions are calculated. Just to ens
 Explain here
 
 ## Results
-To analyze our results, we can make use of SHAP plots. For each demographic X, there are two SHAP plots constructed from our model predicting whether an officer's propensity to stop demographic X will increase/decrease. First, the summary plot shows the impact of each model feature on the output prediction. For each demographic X's summary plot, we are most concerned with the effect of the X_influencing feature, since this describes how our model relates policing behavior of an officer to the influence of other officers. Second, the dependence plot gives us a more detailed look into how X_influencing with X_officer_past jointly affects an officer's propensity to stop demographic X.
+To analyze our results, we can make use of SHAP plots. For each demographic X, there are two SHAP plots constructed from our model predicting whether an officer's propensity to stop demographic X will increase/decrease. First, the summary plot shows the impact of each model feature on the output prediction. For each demographic X's summary plot, we are most concerned with the effect of the X_influencing feature, since this describes how our model relates policing behavior of an officer to the influence of other officers. Second, the dependence plot gives us a more detailed look into how X_influencing with X_officer_past jointly affects an officer's propensity to stop demographic X. For the first demographic analyzed, I will spend more time explaining the analysis process than subsequent demographics, since subsequent ones will follow a similar pattern.
 
 ### SHAP Female (F)
 First it's importance the check whether our model has some degree of predictive power. This model's accuracy on our evaluation set comes out to 64.6%, on a set where our class 0 vs. class 1 split is 46.7% vs 53.3%. We should not expect 100% accuracy, since there are certainly other explanatory variables; however, an accuracy of 64.6% is definitely an improvement over the best naive guess of the majority class that would yield 53.3% accuracy. 
@@ -34,9 +34,11 @@ Diving a bit deeper, the dependence plot shows a key detail related to our hypot
 ![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/F_alone_shap_dependence.png)
 
 ### SHAP Male (M)
+The M model accuracy comes out to 65%, which is reasonably better than the naive guess at 54.5% accuracy. The SHAP summary plot generally shows that our prediction increases as M_influencing increases.
 ![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_summary.png)
 ![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_dependence.png)
 
+Additionally, holding M_officer_past relatively constant, M_influencing still has a large effect on the SHAP value.
 From here, we can look at our SHAP plots by race/descent. 
 
 ### SHAP Hispanic/Latin/Mexican (H)
