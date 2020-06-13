@@ -14,11 +14,19 @@ At any point in time, we can calculate the distribution of how an officer stops 
 ### Notes
 Regard stops demographic distributions: In the case of sex, this is a distribution over male and female, since the dataset only contains those labels. In the case of race / descent, we only include groups with more than 10k sample rows. Those include Hispanic/Latin/Mexican (H), Black (B), White (W), Other (O), Other Asian (A). 
 
+Additionally, there are some assumptions made. It is possible that an officer changes which areas he/she operates in between "past period" and "future period". Different areas can have different demographic distributions, which can confound the design above. A rudimentary and non-perfect way I control for this by only considering cases where the distribution of an officer's reporting districts does not change too much, specifically only allow each district to change +/-10%. This can fail dramatically though, especially if an officer works in many different districts, each with a small percentage. Given the data we have to work with, a better sanity check for this is actually to perform our analysis on our sex stop distributions first. It is a reasonable assumption that the population distribution of M:F should not vary too much between districts. Therefore, the change in underlying population distribution is controlled for.
+
+One final constraint involves how stop distributions are calculated. Just to ensure that vehical stops contributing to an officer's distribution truly reflect the actions of the officer being evaluated, and not his/her partner, we calculate our stop distributions only using vehical stops when an officer is alone / without another officer involved. 
+
 ## Code Walkthrough
 Explain here
 
 ## Results
-Results here
+To analyze our results, we can make use of SHAP plots. First below are SHAP plots for the model predicting whether an officer's propensity to stop females will increase/decrease.
+
+![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/F_alone_shap_summary.png)
+
+![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/F_alone_shap_dependence.png)
 
 ## Future Work
 Future work here
