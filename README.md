@@ -31,15 +31,15 @@ Next comes the analysis section. For anyone looking to dive deep into the code, 
     * [Remove any old data outside the "past period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L387-L388)
     * [Calculate officer demographic stop distributions in the "past period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L390-L397)
 3) [Iterate over all gathered "past period" reference dates](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L418-L420)
-  - 3a. [Determine the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L422-L423)
-  - 3b. [Iterate over each candidate officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L425-L429)
-    - 3bi. [Gather the candidate officer's influencing officers in the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L437-L442)
-    - 3bii. [Calculate the weight distribution of the influencing officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L444-L453)
-    - 3biii. [Store modeling data sample](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L455-L464)
+    * [Determine the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L422-L423)
+    * [Iterate over each candidate officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L425-L429)
+        * [Gather the candidate officer's influencing officers in the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L437-L442)
+        * [Calculate the weight distribution of the influencing officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L444-L453)
+        * [Store modeling data sample](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L455-L464)
 4) [Iterate over each demographic](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L470-L472)
-  - 4a. [Create train and evaluation datasets from step 3biii modeling data](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L475-L483)
-  - 4b. [Train a Gradient Boosting classifier for the demographic](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L485-L486)
-  - 4c. [Evaluate the model and create SHAP plots](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L488-L492)
+    * [Create train and evaluation datasets from stored modeling data](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L475-L483)
+    * [Train a Gradient Boosting classifier for the demographic](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L485-L486)
+    * [Evaluate the model and create SHAP plots](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L488-L492)
 
 ## Results
 To analyze our results, we can make use of SHAP plots. For each demographic X, there are two SHAP plots constructed from our model predicting whether an officer's propensity to stop demographic X will increase/decrease. First, the summary plot shows the impact of each model feature on the output prediction. For each demographic X's summary plot, we are most concerned with the effect of the X_influencing feature, since this describes how our model relates policing behavior of an officer to the influence of other officers. Second, the dependence plot gives us a more detailed look into how X_influencing with X_officer_past jointly affects an officer's propensity to stop demographic X. For the first demographic analyzed, I will spend more time explaining the analysis process than subsequent demographics, since subsequent ones will follow a similar pattern.
