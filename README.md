@@ -22,10 +22,15 @@ One final constraint involves how stop distributions are calculated. Just to ens
 Explain here
 
 ## Results
-To analyze our results, we can make use of SHAP plots. First below are SHAP plots for the model predicting whether an officer's propensity to stop females will increase/decrease. The summary plot shows the impact of each model feature on the output prediction. For each demographic X's summary plot, we are most concerned with the effect of the X_influencing feature, since this describes how our model relates policing behavior of an officer to the influence of other officers.
+To analyze our results, we can make use of SHAP plots. For each demographic X, there are two SHAP plots constructed from our model predicting whether an officer's propensity to stop demographic X will increase/decrease. First, the summary plot shows the impact of each model feature on the output prediction. For each demographic X's summary plot, we are most concerned with the effect of the X_influencing feature, since this describes how our model relates policing behavior of an officer to the influence of other officers. Second, the dependence plot gives us a more detailed look into how X_influencing with X_officer_past jointly affects an officer's propensity to stop demographic X.
 
 ### SHAP Female (F)
+First it's importance the check whether our model has some degree of predictive power. This model's accuracy on our evaluation set comes out to 64.6%, on a set where our class 0 vs. class 1 split is 46.7% vs 53.3%. We should not expect 100% accuracy, since there are certainly other explanatory variables; however, an accuracy of 64.6% is definitely an improvement over the best naive guess of the majority class that would yield 53.3% accuracy. 
+
+Regarding the summary plot, F_officer_past has the largest impact. This should be expected, since low F_officer_past values do not have too much room to go lower (likewise with high values going higher). F_influencing, however, does generally show that our prediction increases as influencing officers' propensity to stop demographic F increases, which is our initial hypothesis. 
 ![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/F_alone_shap_summary.png)
+
+Diving a bit deeper, the dependence plot shows a key detail related to our hypothesis. Not all dots with low F_officer_past are treated the same. We can see that holding F_officer_past relatively constant, F_influencing still has a large effect on the SHAP value. The same can be said about dots with high F_officer_past not all be treated the same.
 ![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/F_alone_shap_dependence.png)
 
 ### SHAP Male (M)
