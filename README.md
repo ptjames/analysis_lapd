@@ -35,35 +35,43 @@ Diving a bit deeper, the dependence plot shows a key detail related to our hypot
 
 ### SHAP Male (M)
 The M model accuracy comes out to 65%, which is reasonably better than the naive guess at 54.5% accuracy. The SHAP summary plot generally shows that our prediction increases as M_influencing increases.
-![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_summary.png)
+![male SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_summary.png)
 
 Additionally, holding M_officer_past relatively constant, M_influencing still has a large effect on the SHAP value.
-![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_dependence.png)
+![male SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/M_alone_shap_dependence.png)
 
 ### SHAP Hispanic/Latin/Mexican (H)
 Next we move onto racial demographics. Remember that we have to maintain stronger assumptions with these, since different areas of the city have different racial distributions. I will revisit this point one more time in the Future Work section below. 
 
 Model accuracy for H comes out to 64.7%, which is an improvement over the naive guess at 56.5% accuracy. The SHAP summary plot generally shows that our prediction increases as H_influencing increases.
-![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/H_alone_shap_summary.png)
+![hispanic SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/H_alone_shap_summary.png)
 
 For the dependence, holding H_officer_past relatively constant, H_influencing still has a large effect on the SHAP value.
-![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/H_alone_shap_dependence.png)
+![hispanic SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/H_alone_shap_dependence.png)
 
 ### SHAP Black (B)
-![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/B_alone_shap_summary.png)
-![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/B_alone_shap_dependence.png)
+The B model accuracy comes out to 64.7%, which is a good deal better than the naive guess at 50.4% accuracy. The SHAP summary plot generally shows that our prediction increases as B_influencing increases.
+![black SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/B_alone_shap_summary.png)
+
+Additionally, holding B_officer_past relatively constant, B_influencing still has a large effect on the SHAP value. The B dependence plot also has a pretty interesting area at the far right where a group of red dots however close to a SHAP value of 0.0. This suggests a group of officers with a sustained propensity to stop black people at high rates. Note that it is possible this arises from operating in an area that is heavily black.
+![black SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/B_alone_shap_dependence.png)
 
 ### SHAP White (W)
-![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/W_alone_shap_summary.png)
-![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/W_alone_shap_dependence.png)
+Model accuracy for W comes out to 62.1%, which is an improvement over the naive guess at 51.0% accuracy. The SHAP summary plot generally shows that our prediction increases as W_influencing increases.
+![white SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/W_alone_shap_summary.png)
+
+For the dependence, holding W_officer_past relatively constant, W_influencing still has a large effect on the SHAP value.
+![white SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/W_alone_shap_dependence.png)
 
 ### SHAP Other (O)
-![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/O_alone_shap_summary.png)
-![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/O_alone_shap_dependence.png)
+For O, the model accuracy (60.6%) is not notably better than the naive guess (57.7%); therefore, it makes little sense to talk about the SHAP plots here. I've included links to them here for those interested.
+[other SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/O_alone_shap_summary.png)
+[other SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/O_alone_shap_dependence.png)
 
 ### SHAP Asian (A)
-![female SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/A_alone_shap_summary.png)
-![female SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/A_alone_shap_dependence.png)
+For A, the model accuracy (58.9%) is not notably better than the naive guess (53.9%); therefore, it makes little sense to talk about the SHAP plots here. I've included links to them here for those interested.
+![asian SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/A_alone_shap_summary.png)
+![asian SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/A_alone_shap_dependence.png)
 
 
 ## Future Work
