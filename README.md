@@ -34,7 +34,7 @@ Next comes the analysis section. For anyone looking to dive deep into the code, 
     * [Determine the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L422-L423)
     * [Iterate over each candidate officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L425-L429)
         * [Gather the candidate officer's influencing officers in the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L437-L442)
-        * [Calculate the weight distribution of the influencing officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L444-L453)
+        * [Calculate the weighted distribution of the influencing officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L444-L453)
         * [Store modeling data sample](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L455-L464)
 4) [Iterate over each demographic](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L470-L472)
     * [Create train and evaluation datasets from stored modeling data](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L475-L483)
