@@ -1,15 +1,15 @@
 # Analyzing LAPD Vehical Stop Data 
-The following analysis is based on the dataset found [here](https://data.lacity.org/A-Safe-City/Vehicle-and-Pedestrian-Stop-Data-2010-to-Present/ci25-wgt7)
+The dataset on LAPD vehical and pedestrian stops can be found [here](https://data.lacity.org/A-Safe-City/Vehicle-and-Pedestrian-Stop-Data-2010-to-Present/ci25-wgt7)
 
 ## Motivation
-At the heart of this analysis is trying to understand whether police officers influence each others' policing behaviors. Specifically, this work investigates whether when a police officer works with other officers, does he/she incorporate the biases in how the other officers stop different demographics into his/her future policing.
+At the heart of this analysis is exploring whether police officers influence each others' policing behaviors. Specifically, when a police officer makes vehical stops with other officers, does he/she incorporate biases in how the other officers stop various demographics into his/her policing.
 
 ## Problem Design
-We can attempt to answer this question with the following design:
+We can attempt to answer this question with the design below.
 
 ![problem_design](https://github.com/ptjames/analysis_lapd/blob/master/analysis/problem_design.jpg)
 
-At any point in time, we can calculate the distribution of how an officer stops demographics (sex or race/descent) over some time period. If we calculate this type of distribution at two different non-overlapping time periods (a "past period" and a "future period"), there will be some period in between that I will call the "influencing period". Let's assume action(s) can take place in the "influencing" period that will relate to an observable difference between the "past period" and "future period" distributions. The hypothesis here is that an officer making vehical stops with other officers, thereby working among officers with varying stops distributions, can be a kind of influencing action. For this problem design, the influencing officers' distributions are calculated during the "past period", so that they are comparable to the "past period" distribution of the officer being evaluated.  
+At any point in time, we can calculate the distribution of demographics (sex or race/descent) for how an officer stops vehicals over some time period. If we calculate this type of distribution at two non-overlapping time periods ("past period" and "future period" in the graphic), there will be a period in between; call this the "influencing period". Assume action(s) can take place in the "influencing" period that will result in an observable difference between an officer's "past period" and "future period" distributions. The hypothesis here is that an officer making vehical stops with other officers, thereby working among officers with varying stops distributions, can be a kind of influencing action. For this problem design, the influencing officers' distributions are calculated during the "past period", so that they are comparable to the "past period" distribution of the officer being evaluated.  
 
 ### Notes
 Regard stops demographic distributions: In the case of sex, this is a distribution over male and female, since the dataset only contains those labels. In the case of race / descent, we only include groups with more than 10k sample rows. Those include Hispanic/Latin/Mexican (H), Black (B), White (W), Other (O), Other Asian (A). 
