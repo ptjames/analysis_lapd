@@ -7,7 +7,7 @@ At the heart of this analysis is trying to understand whether police officers in
 ## Problem Design
 We can attempt to answer this question with the following design:
 
-![problem_design](https://github.com/ptjames/analysis_lapd/blob/master/analysis/problem_design.png)
+![problem_design](https://github.com/ptjames/analysis_lapd/blob/master/analysis/problem_design.jpg)
 
 At any point in time, we can calculate the distribution of how an officer stops demographics (sex or race/descent) over some time period. If we calculate this type of distribution at two different non-overlapping time periods (a "past period" and a "future period"), there will be some period in between that I will call the "influencing period". Let's assume action(s) can take place in the "influencing" period that will relate to an observable difference between the "past period" and "future period" distributions. The hypothesis here is that an officer making vehical stops with other officers, thereby working among officers with varying stops distributions, can be a kind of influencing action. For this problem design, the influencing officers' distributions are calculated during the "past period", so that they are comparable to the "past period" distribution of the officer being evaluated.  
 
