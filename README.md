@@ -20,11 +20,11 @@ Regarding demographics considered: In the case of sex, male and female are consi
 To ensure that vehical stops contributing to an officer's distribution of demographics truly reflect the actions of the officer being evaluated (and not his/her partner), we calculate our stop distributions only using vehical stops when an officer is alone / without another officer involved. 
 
 ## Process
-First the vehical stop data was loaded into a database. This was done by:
+First the vehical stop data was loaded into a database. A MySQL database was used, since the analysis does not require more complex SQL actions, but other variants of SQL would be fine. At a high level this process is as follows:
 1) [Define the stops table design](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_tables.py#L60-L75)
-2) [Load the stops csv into the database table](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_fill_from_csv.py#L61)
+2) [Load the stops csv into the table](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_fill_from_csv.py#L61)
 
-Next comes the analysis section. For anyone looking to dive deep into the code, start at the MAIN section [here](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L330) and scroll down from there. I have commented each step in the MAIN section to others can follow along. For those looking for a higher level overview, I have written out the following steps:
+Next comes the analysis section. For anyone looking to dive deep into the code, start at the [MAIN section](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L330) and scroll down. I have commented each step in the MAIN section, so others can follow along. For those looking for a higher level overview, steps are as follows:
 
 1) [Query the vehical stops data](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L52)
 2) [Iterate over returned rows by date asc](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L350-L357)
@@ -43,7 +43,7 @@ Next comes the analysis section. For anyone looking to dive deep into the code, 
     * [Evaluate the model and create SHAP plots](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L488-L492)
 
 ## Results
-To analyze our results, we can make use of SHAP plots. For each demographic X, there are two SHAP plots constructed from our model predicting whether an officer's propensity to stop demographic X will increase/decrease. First, the summary plot shows the impact of each model feature on the output prediction. For each demographic X's summary plot, we are most concerned with the effect of the X_influencing feature, since this describes how our model relates policing behavior of an officer to the influence of other officers. Second, the dependence plot gives us a more detailed look into how X_influencing with X_officer_past jointly affects an officer's propensity to stop demographic X. For the first demographic analyzed, I will spend more time explaining the analysis process than subsequent demographics, since subsequent ones will follow a similar pattern.
+To analyze our results, we make use of SHAP plots. General information on SHAP plots can be found [here](https://github.com/slundberg/shap). For each demographic X, there are two SHAP plots constructed for each demographic's model. First, the summary SHAP plot shows the impact of each model feature on the output binary prediction. For each demographic X's summary plot, we focus on the effect of the X_influencing feature, since it describes how our model relates an officer's policing behavior to the influence of other officers. Second, the dependence SHAP plot gives us a more detailed look into how (X_influencing, X_officer_past) jointly affects an officer's propensity to stop demographic X. For the first demographic analyzed, a more thorough explanation is given than subsequent demographics, since subsequent ones will follow a similar analysis pattern.
 
 ### SHAP Female (F)
 First it's importance the check whether our model has some degree of predictive power. This model's accuracy on our evaluation set comes out to 64.6%, on a set where our class 0 vs. class 1 split is 46.7% vs 53.3%. We should not expect 100% accuracy, since there are certainly other explanatory variables; however, an accuracy of 64.6% is definitely an improvement over the best naive guess of the majority class that would yield 53.3% accuracy. 
