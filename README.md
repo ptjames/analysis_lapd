@@ -24,26 +24,26 @@ To ensure that vehicle stops contributing to an officer's distribution of demogr
 
 ## Process
 First the vehicle stop data was loaded into a database. A MySQL database was used, since the analysis does not require more complex SQL actions, but other variants of SQL would be fine. At a high level this process is as follows:
-1) [Define the stops table design](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_tables.py#L60-L75)
-2) [Load the stops csv into the table](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_fill_from_csv.py#L61)
+1) [Define the stops table design](https://github.com/ptjames/analysis_lapd/blob/master/data/db_tables.py#L43-L58)
+2) [Load the stops csv into the table](https://github.com/ptjames/analysis_lapd/blob/master/data/db_fill_from_csv.py#L85-L104)
 
-Next comes the analysis section. For anyone looking to dive deep into the code, start at the [MAIN section](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L330) and scroll down. I have commented each step in the MAIN section, so others can follow along. For those looking for a higher level overview, steps are as follows:
+Next comes the analysis section. For anyone looking to dive deep into the code, start at the [MAIN section](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L330) and scroll down. I have commented each step in the MAIN section, so others can follow along. For those looking for a higher level overview, steps are as follows:
 
-1) [Query the vehicle stops data](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L52)
-2) [Iterate over returned rows by date asc](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L350-L357)
-    * [Gather data up until the next candidate "past period" reference date](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L368-L376)
-    * [Remove any old data outside the "past period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L387-L388)
-    * [Calculate officer demographic stop distributions in the "past period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L390-L397)
-3) [Iterate over all gathered "past period" reference dates](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L418-L420)
-    * [Determine the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L422-L423)
-    * [Iterate over each candidate officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L425-L429)
-        * [Gather the candidate officer's influencing officers in the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L437-L442)
-        * [Calculate the weighted distribution of the influencing officers](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L444-L453)
-        * [Store modeling data sample](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L455-L464)
-4) [Iterate over each demographic](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L470-L472)
-    * [Create train and evaluation datasets from stored modeling data](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L475-L483)
-    * [Train a Gradient Boosting classifier for the demographic](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L485-L486)
-    * [Evaluate the model and create SHAP plots](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L488-L492)
+1) [Query the vehicle stops data](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L52)
+2) [Iterate over returned rows by date asc](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L350-L357)
+    * [Gather data up until the next candidate "past period" reference date](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L368-L376)
+    * [Remove any old data outside the "past period"](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L387-L388)
+    * [Calculate officer demographic stop distributions in the "past period"](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L390-L397)
+3) [Iterate over all gathered "past period" reference dates](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L418-L420)
+    * [Determine the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L422-L423)
+    * [Iterate over each candidate officers](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L425-L429)
+        * [Gather the candidate officer's influencing officers in the "influencing period"](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L437-L442)
+        * [Calculate the weighted distribution of the influencing officers](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L444-L453)
+        * [Store modeling data sample](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L455-L464)
+4) [Iterate over each demographic](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L470-L472)
+    * [Create train and evaluation datasets from stored modeling data](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L475-L483)
+    * [Train a Gradient Boosting classifier for the demographic](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L485-L486)
+    * [Evaluate the model and create SHAP plots](https://github.com/ptjames/analysis_lapd/blob/master/analysis/analysis.py#L488-L492)
 
 ## Results
 For this analysis, SHAP plots are used to interpret each model. In brief, a SHAP value shows to what degree an input feature contributes towards a prediction value (positive SHAP value means higher prediction value, etc). Each input data observation gets its own set of SHAP values. General information on SHAP values and plots can be found [here](https://github.com/slundberg/shap). For each demographic X, there are two SHAP plots constructed for each demographic's model. First, the summary SHAP plot shows the impact of each model feature on the output binary prediction. For each demographic X's summary plot, we focus on the effect of the X_influencing feature, since it describes how our model relates an officer's policing behavior to the influence of other officers. Second, the dependence SHAP plot gives us a more detailed look into how (X_influencing, X_officer_past) jointly affects an officer's propensity to stop demographic X. For the first demographic analyzed, a more thorough explanation is given than subsequent demographics, since subsequent ones will follow a similar analysis pattern.
