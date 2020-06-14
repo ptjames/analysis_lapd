@@ -84,16 +84,11 @@ def insert_data_by_batch(df, row_headers, cur, con):
 
 con, cur = db_utils.connect_to_db()
 tables = {
-
-	'policing.crimes': {
-		'file_name': 'Crime_Data_from_2010_to_2019.csv',
-		'dtypes': {'DATE OCC': str, 'TIME OCC': str}
-	}, 
 	
-	#'policing.vehical_pedestrian_stops': {
-	#	'file_name': 'Vehicle_and_Pedestrian_Stop_Data_2010_to_Present.csv',
-	#	'dtypes': {'Stop Date': str, 'Officer 1 Serial Number': str, 'Officer 2 Serial Number': str}
-	#}
+	'policing.vehicle_pedestrian_stops': {
+		'file_name': 'Vehicle_and_Pedestrian_Stop_Data_2010_to_Present.csv',
+		'dtypes': {'Stop Date': str, 'Officer 1 Serial Number': str, 'Officer 2 Serial Number': str}
+	}
 
 }
 for table in tables:

@@ -63,7 +63,7 @@ def query_stops_data(demographic_field_name):
 			reporting_district,
 			""" + demographic_field_name + """,
 			stop_type
-		FROM policing.vehical_pedestrian_stops
+		FROM policing.vehicle_pedestrian_stops
 		WHERE stop_type = 'VEH'
 		AND stop_date NOT IN ('', 'nan')
 		AND stop_date > '2010/01/01'

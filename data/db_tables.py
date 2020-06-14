@@ -40,24 +40,7 @@ def create_tables(con, cur, tables_existing):
 	print('\ncreating tables...')
 	tables = {
 
-		"crimes": [
-			["dr_no", "VARCHAR(16)"],
-			["date_occ", "VARCHAR(16)"],
-			["time_occ", "VARCHAR(4)"],
-			["crm_cd", "VARCHAR(4)"],
-			["crm_cd_desc", "VARCHAR(64)"],
-			["status_desc", "VARCHAR(16)"],
-			["vict_age", "VARCHAR(4)"],
-			["vict_sex", "VARCHAR(4)"],
-			["vict_descent", "VARCHAR(4)"],
-			["rpt_dist_no", "VARCHAR(4)"],
-			["location", "VARCHAR(64)"],
-			["cross_street", "VARCHAR(64)"],
-			["index", "date_occ"],
-			["index", "rpt_dist_no"]
-		],
-
-		"vehical_pedestrian_stops": [
+		"vehicle_pedestrian_stops": [
 			['stop_number', "VARCHAR(16)"], 
 			['stop_date', "VARCHAR(16)"], 
 			['stop_time', "VARCHAR(6)"],

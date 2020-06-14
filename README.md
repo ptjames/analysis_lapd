@@ -1,15 +1,15 @@
 # Analyzing LAPD Vehical Stop Data 
-The dataset on LAPD vehical and pedestrian stops can be found [here](https://data.lacity.org/A-Safe-City/Vehicle-and-Pedestrian-Stop-Data-2010-to-Present/ci25-wgt7)
+The dataset on LAPD vehicle and pedestrian stops can be found [here](https://data.lacity.org/A-Safe-City/Vehicle-and-Pedestrian-Stop-Data-2010-to-Present/ci25-wgt7)
 
 ## Motivation
-At the heart of this analysis is exploring whether police officers influence each others' policing behaviors. Specifically, when a police officer makes vehical stops with other officers, does he/she incorporate biases in how the other officers stop various demographics into his/her policing.
+At the heart of this analysis is exploring whether police officers influence each others' policing behaviors. Specifically, when a police officer makes vehicle stops with other officers, does he/she incorporate biases in how the other officers stop various demographics into his/her policing.
 
 ## Problem Design
 We can attempt to answer this question with the design below.
 
 ![problem_design](https://github.com/ptjames/analysis_lapd/blob/master/analysis/problem_design.jpg)
 
-At any point in time, we can calculate the distribution of demographics (sex or race/descent) for how an officer stops vehicals over some time period. If we calculate this type of distribution at two non-overlapping time periods ("past period" and "future period" in the graphic), there will be a period in between; call this the "influencing period". Assume action(s) can take place in the "influencing" period that will result in an observable difference between an officer's "past period" and "future period" distributions. The hypothesis here is that when an officer makes vehical stops with other officers during the "influencing period", the higher the likelihood influencing officers stopped a specific demographic during the "past period", the more likely the original officer will stop that demographic in the "future period". To approximate this relationship, a model will be trained to predict whether an officer's probability of stopping a demographic will increase or not increase between "past period" and "future period". This is formatted as a binary problem with class 1 being an increase and class 0 otherwise. The model input features include:
+At any point in time, we can calculate the distribution of demographics (sex or race/descent) for how an officer stops vehicles over some time period. If we calculate this type of distribution at two non-overlapping time periods ("past period" and "future period" in the graphic), there will be a period in between; call this the "influencing period". Assume action(s) can take place in the "influencing" period that will result in an observable difference between an officer's "past period" and "future period" distributions. The hypothesis here is that when an officer makes vehicle stops with other officers during the "influencing period", the higher the likelihood influencing officers stopped a specific demographic during the "past period", the more likely the original officer will stop that demographic in the "future period". To approximate this relationship, a model will be trained to predict whether an officer's probability of stopping a demographic will increase or not increase between "past period" and "future period". This is formatted as a binary problem with class 1 being an increase and class 0 otherwise. The model input features include:
 
  * Set X_officer_past: for each demographic X, an officer's probability of stopping X in "past period"
  * Set X_influencing: for each demographic X, the influencing officers' weighted probability of stopping X in "past period"
@@ -20,16 +20,16 @@ It is possible that an officer changes which areas he/she operates in between "p
 ### Constraints
 Regarding demographics considered: In the case of sex, male and female are considered, since the dataset only contains those labels. For race / descent, only groups with more than 10k sample rows are included. These include Hispanic/Latin/Mexican (H), Black (B), White (W), Other (O), Other Asian (A). 
 
-To ensure that vehical stops contributing to an officer's distribution of demographics truly reflect the actions of the officer being evaluated (and not his/her partner), we calculate our stop distributions only using vehical stops when an officer is alone / without another officer involved. 
+To ensure that vehicle stops contributing to an officer's distribution of demographics truly reflect the actions of the officer being evaluated (and not his/her partner), we calculate our stop distributions only using vehicle stops when an officer is alone / without another officer involved. 
 
 ## Process
-First the vehical stop data was loaded into a database. A MySQL database was used, since the analysis does not require more complex SQL actions, but other variants of SQL would be fine. At a high level this process is as follows:
+First the vehicle stop data was loaded into a database. A MySQL database was used, since the analysis does not require more complex SQL actions, but other variants of SQL would be fine. At a high level this process is as follows:
 1) [Define the stops table design](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_tables.py#L60-L75)
 2) [Load the stops csv into the table](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/data/db_fill_from_csv.py#L61)
 
 Next comes the analysis section. For anyone looking to dive deep into the code, start at the [MAIN section](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L330) and scroll down. I have commented each step in the MAIN section, so others can follow along. For those looking for a higher level overview, steps are as follows:
 
-1) [Query the vehical stops data](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L52)
+1) [Query the vehicle stops data](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L52)
 2) [Iterate over returned rows by date asc](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L350-L357)
     * [Gather data up until the next candidate "past period" reference date](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L368-L376)
     * [Remove any old data outside the "past period"](https://github.com/ptjames/analysis_lapd/blob/a2b51f26fdf1461d38e705b7d16aa92e82bc16c3/analysis/analysis.py#L387-L388)
@@ -101,7 +101,7 @@ For A, the model accuracy (58.9%) is not notably better than the naive guess (53
 
 
 ## Future Work
-From here, there are two clear improvements to make. First, a better way to control for area population distributions is needed. Factoring in reporting district demographic data along with the reporting districts where officers are making vehical stops could better address this issue. Second, increasing sample size could both increase confidence in our models and increase model accuracy. The latter is possible by learning more complex input -> output functions through using models that require a larger number of trainable parameters (note, however, that increased model complexity does not guarantee improved performance). This sample size increase can come from expanding the dataset outside of LA county. Since this analysis has shown promising results, I hope these improvements can be completed at some point.
+From here, there are two clear improvements to make. First, a better way to control for area population distributions is needed. Factoring in reporting district demographic data along with the reporting districts where officers are making vehicle stops could better address this issue. Second, increasing sample size could both increase confidence in our models and increase model accuracy. The latter is possible by learning more complex input -> output functions through using models that require a larger number of trainable parameters (note, however, that increased model complexity does not guarantee improved performance). This sample size increase can come from expanding the dataset outside of LA county. Since this analysis has shown promising results, I hope these improvements can be completed at some point.
 
 
 
