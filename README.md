@@ -1,4 +1,4 @@
-# Analyzing LAPD Vehical Stop Data 
+# Analyzing LAPD Vehicle Stop Data 
 The dataset on LAPD vehicle and pedestrian stops can be found [here](https://data.lacity.org/A-Safe-City/Vehicle-and-Pedestrian-Stop-Data-2010-to-Present/ci25-wgt7)
 
 ## Motivation
