@@ -90,16 +90,14 @@ For the dependence, holding W_officer_past relatively constant, W_influencing st
 ### SHAP Other (O)
 For O, the model accuracy (60.6%) is not notably better than the naive guess (57.7%); therefore, it makes little sense to talk about the SHAP plots here. I've included links to them here for those interested.
 
-[O SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/O_alone_shap_summary.png)
-
-[O SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/O_alone_shap_dependence.png)
+ * [O SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/O_alone_shap_summary.png)
+ * [O SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/O_alone_shap_dependence.png)
 
 ### SHAP Asian (A)
 For A, the model accuracy (58.9%) is not notably better than the naive guess (53.9%); therefore, it makes little sense to talk about the SHAP plots here. I've included links to them here for those interested.
 
-[A SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/A_alone_shap_summary.png)
-
-[A SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/A_alone_shap_dependence.png)
+ * [A SHAP summary plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/A_alone_shap_summary.png)
+ * [A SHAP dependence plot](https://github.com/ptjames/analysis_lapd/blob/master/analysis/plots/A_alone_shap_dependence.png)
 
 
 ## Future Work
